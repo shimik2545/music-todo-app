@@ -109,6 +109,15 @@
     }
 
     renderSongs();
+  
+    const backBtn = document.createElement("button");
+    backBtn.textContent = "🔙 חזור";
+    backBtn.style = "padding: 10px 20px; font-size: 16px; border-radius: 8px; background-color: #9e9e9e; color: white; border: none; cursor: pointer; margin-top: 30px;";
+    backBtn.onclick = () => {
+      window.location.href = `rhythm.html?category=${encodeURIComponent(category)}`;
+    };
+    document.body.appendChild(backBtn);
+
   </script>
 </body>
 </html>
