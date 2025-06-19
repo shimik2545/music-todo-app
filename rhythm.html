@@ -5,35 +5,115 @@
   <title>בחר קצב</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: sans-serif; text-align: center; padding: 30px; direction: rtl; background: #fffbe7; }
-    button { font-size: 18px; margin: 10px; padding: 12px 24px; border-radius: 10px; border: none; background-color: #4caf50; color: white; cursor: pointer; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom, #fffde7, #ffffff);
+      text-align: center;
+      padding: 30px;
+      direction: rtl;
+    }
+    h1 {
+      font-size: 28px;
+      color: #795548;
+      margin-bottom: 20px;
+    }
+    .rhythm-button {
+      font-size: 18px;
+      margin: 10px;
+      padding: 14px 30px;
+      border-radius: 10px;
+      border: none;
+      background-color: #4caf50;
+      color: white;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .rhythm-button:hover {
+      background-color: #388e3c;
+      transform: scale(1.05);
+    }
+    #addSection {
+      margin-top: 30px;
+    }
+    input[type="text"] {
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      width: 200px;
+    }
+    #addBtn {
+      background-color: #2196f3;
+      margin-right: 10px;
+    }
   </style>
 </head>
 <body>
   <h1 id="title">בחר קצב</h1>
   <div id="rhythms"></div>
 
+  <div id="addSection" style="display: none;">
+    <h3>➕ הוסף קצב חדש</h3>
+    <input type="text" id="newRhythmInput" placeholder="שם קצב חדש">
+    <button id="addBtn" class="rhythm-button" onclick="addNewRhythm()">הוסף</button>
+  </div>
+
   <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const category = urlParams.get('category');
+    const category = new URLSearchParams(window.location.search).get("category");
     document.getElementById("title").innerText = "בחר קצב עבור: " + category;
 
-    const rhythmOptions = {
+    const defaultRhythms = {
       "ריקודים": ["מהיר", "בינוני", "איטי"],
       "רגש": ["איטי", "נוסטלגי", "הרמוני"],
       "סעודה": ["קלאסי", "ניגון", "אווירה"]
     };
 
-    const rhythms = rhythmOptions[category] || [];
     const container = document.getElementById("rhythms");
-    rhythms.forEach(rhythm => {
-      const btn = document.createElement("button");
-      btn.textContent = rhythm;
-      btn.onclick = () => {
-        window.location.href = `songs.html?category=${encodeURIComponent(category)}&rhythm=${encodeURIComponent(rhythm)}`;
-      };
-      container.appendChild(btn);
-    });
+
+    function getRhythms() {
+      const saved = localStorage.getItem("customRhythms-" + category);
+      if (saved) {
+        return JSON.parse(saved);
+      }
+      return defaultRhythms[category] || [];
+    }
+
+    function saveRhythms(list) {
+      localStorage.setItem("customRhythms-" + category, JSON.stringify(list));
+    }
+
+    function renderRhythms() {
+      container.innerHTML = "";
+      getRhythms().forEach(rhythm => {
+        const btn = document.createElement("button");
+        btn.className = "rhythm-button";
+        btn.textContent = rhythm;
+        btn.onclick = () => {
+          window.location.href = `songs.html?category=${encodeURIComponent(category)}&rhythm=${encodeURIComponent(rhythm)}`;
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function addNewRhythm() {
+      const input = document.getElementById("newRhythmInput");
+      const newRhythm = input.value.trim();
+      if (!newRhythm) return;
+      const list = getRhythms();
+      if (!list.includes(newRhythm)) {
+        list.push(newRhythm);
+        saveRhythms(list);
+        renderRhythms();
+      }
+      input.value = "";
+    }
+
+    // הצגת קטע הוספת קצב רק בקטגוריית ריקודים
+    if (category === "ריקודים") {
+      document.getElementById("addSection").style.display = "block";
+    }
+
+    renderRhythms();
   </script>
 </body>
 </html>
