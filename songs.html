@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>ניהול שירים</title>
+  <title>ניהול שירים בענן</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body { font-family: sans-serif; background: #eef; padding: 20px; direction: rtl; }
@@ -36,38 +36,32 @@
   <div id="songsList"></div>
 
   <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const category = urlParams.get('category');
-    const rhythm = urlParams.get('rhythm');
-    const key = `songs-${category}-${rhythm}`;
+    const category = new URLSearchParams(window.location.search).get("category");
+    const rhythm = new URLSearchParams(window.location.search).get("rhythm");
     document.getElementById("listTitle").innerText = `רשימת שירים לקטגוריה: ${category} / קצב: ${rhythm}`;
 
     const songsList = document.getElementById("songsList");
 
-    function saveSongs(songs) {
-      localStorage.setItem(key, JSON.stringify(songs));
+    async function fetchSongs() {
+      const res = await fetch("https://script.google.com/macros/s/AKfycbybHPxmX4vezQ5JN_RGIBbh3WSWgGqbmyC_MVyXAdkch2yfiGDOztSSS64FbH5a7mL1mA/exec");
+      const data = await res.json();
+      return data.filter(song => song.category === category && song.rhythm === rhythm);
     }
 
-    function loadSongs() {
-      return JSON.parse(localStorage.getItem(key) || "[]");
-    }
-
-    function renderSongs() {
+    async function renderSongs() {
+      const songs = await fetchSongs();
       songsList.innerHTML = "";
-      loadSongs().forEach((song, index) => {
+      songs.forEach((song, index) => {
         const div = document.createElement("div");
         div.className = "song";
         div.innerHTML = `
           <div class="song-title">${song.name} (${song.scale} ${song.tone}) - ${song.singer}</div>
-          <div class="actions">
-            <button onclick="editSong(${index})">ערוך</button>
-            <button onclick="deleteSong(${index})">מחק</button>
-          </div>`;
+        `;
         songsList.appendChild(div);
       });
     }
 
-    function addSong() {
+    async function addSong() {
       const name = document.getElementById("songName").value.trim();
       const scale = document.getElementById("scale").value;
       const tone = document.getElementById("tone").value;
@@ -78,38 +72,31 @@
         return;
       }
 
-      const songs = loadSongs();
-      songs.push({ name, scale, tone, singer });
-      saveSongs(songs);
-      renderSongs();
+      const payload = {
+        action: "add",
+        category,
+        rhythm,
+        name,
+        scale,
+        tone,
+        singer
+      };
+
+      await fetch("https://script.google.com/macros/s/AKfycbybHPxmX4vezQ5JN_RGIBbh3WSWgGqbmyC_MVyXAdkch2yfiGDOztSSS64FbH5a7mL1mA/exec", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
 
       document.getElementById("songName").value = "";
       document.getElementById("singer").value = "";
-    }
-
-    function deleteSong(index) {
-      if (!confirm("האם אתה בטוח שברצונך למחוק את השיר?")) return;
-      const songs = loadSongs();
-      songs.splice(index, 1);
-      saveSongs(songs);
       renderSongs();
     }
 
-    function editSong(index) {
-      const songs = loadSongs();
-      const song = songs[index];
-      const newName = prompt("שם חדש לשיר:", song.name);
-      const newSinger = prompt("שם חדש לזמר:", song.singer);
-      if (newName && newSinger) {
-        song.name = newName;
-        song.singer = newSinger;
-        saveSongs(songs);
-        renderSongs();
-      }
-    }
-
     renderSongs();
-  
+
     const backBtn = document.createElement("button");
     backBtn.textContent = "🔙 חזור";
     backBtn.style = "padding: 10px 20px; font-size: 16px; border-radius: 8px; background-color: #9e9e9e; color: white; border: none; cursor: pointer; margin-top: 30px;";
@@ -117,7 +104,6 @@
       window.location.href = `rhythm.html?category=${encodeURIComponent(category)}`;
     };
     document.body.appendChild(backBtn);
-
   </script>
 </body>
 </html>
