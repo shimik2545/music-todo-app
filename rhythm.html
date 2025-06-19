@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>בחר קצב</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 30px; direction: rtl; background: #fffbe7; }
+    button { font-size: 18px; margin: 10px; padding: 12px 24px; border-radius: 10px; border: none; background-color: #4caf50; color: white; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1 id="title">בחר קצב</h1>
+  <div id="rhythms"></div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const category = urlParams.get('category');
+    document.getElementById("title").innerText = "בחר קצב עבור: " + category;
+
+    const rhythmOptions = {
+      "ריקודים": ["מהיר", "בינוני", "איטי"],
+      "רגש": ["איטי", "נוסטלגי", "הרמוני"],
+      "סעודה": ["קלאסי", "ניגון", "אווירה"]
+    };
+
+    const rhythms = rhythmOptions[category] || [];
+    const container = document.getElementById("rhythms");
+    rhythms.forEach(rhythm => {
+      const btn = document.createElement("button");
+      btn.textContent = rhythm;
+      btn.onclick = () => {
+        window.location.href = `songs.html?category=${encodeURIComponent(category)}&rhythm=${encodeURIComponent(rhythm)}`;
+      };
+      container.appendChild(btn);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>ניהול שירים</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: sans-serif; background: #eef; padding: 20px; direction: rtl; }
+    input, select, button { margin: 5px; padding: 10px; font-size: 16px; }
+    .song { background: #fff; border: 1px solid #ccc; padding: 10px; margin: 10px 0; border-radius: 8px; }
+    .song-title { font-weight: bold; }
+    .actions { margin-top: 5px; }
+    .actions button { background-color: #d32f2f; color: white; border: none; padding: 5px 10px; cursor: pointer; margin-left: 5px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1 id="listTitle">רשימת שירים</h1>
+  <div>
+    <input id="songName" placeholder="שם השיר">
+    <select id="scale">
+      <option>A</option><option>A#</option><option>Ab</option>
+      <option>B</option><option>Bb</option>
+      <option>C</option><option>C#</option><option>Cb</option>
+      <option>D</option><option>D#</option><option>Db</option>
+      <option>E</option><option>Eb</option>
+      <option>F</option><option>F#</option><option>Fb</option>
+      <option>G</option><option>G#</option><option>Gb</option>
+    </select>
+    <select id="tone">
+      <option value="minor" selected>מינור</option>
+      <option value="major">מז'ור</option>
+    </select>
+    <input id="singer" placeholder="שם הזמר">
+    <button onclick="addSong()">➕ הוסף שיר</button>
+  </div>
+  <div id="songsList"></div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const category = urlParams.get('category');
+    const rhythm = urlParams.get('rhythm');
+    const key = `songs-${category}-${rhythm}`;
+    document.getElementById("listTitle").innerText = `רשימת שירים לקטגוריה: ${category} / קצב: ${rhythm}`;
+
+    const songsList = document.getElementById("songsList");
+
+    function saveSongs(songs) {
+      localStorage.setItem(key, JSON.stringify(songs));
+    }
+
+    function loadSongs() {
+      return JSON.parse(localStorage.getItem(key) || "[]");
+    }
+
+    function renderSongs() {
+      songsList.innerHTML = "";
+      loadSongs().forEach((song, index) => {
+        const div = document.createElement("div");
+        div.className = "song";
+        div.innerHTML = `
+          <div class="song-title">${song.name} (${song.scale} ${song.tone}) - ${song.singer}</div>
+          <div class="actions">
+            <button onclick="editSong(${index})">ערוך</button>
+            <button onclick="deleteSong(${index})">מחק</button>
+          </div>`;
+        songsList.appendChild(div);
+      });
+    }
+
+    function addSong() {
+      const name = document.getElementById("songName").value.trim();
+      const scale = document.getElementById("scale").value;
+      const tone = document.getElementById("tone").value;
+      const singer = document.getElementById("singer").value.trim();
+
+      if (!name || !singer) {
+        alert("נא למלא את שם השיר ושם הזמר.");
+        return;
+      }
+
+      const songs = loadSongs();
+      songs.push({ name, scale, tone, singer });
+      saveSongs(songs);
+      renderSongs();
+
+      document.getElementById("songName").value = "";
+      document.getElementById("singer").value = "";
+    }
+
+    function deleteSong(index) {
+      if (!confirm("האם אתה בטוח שברצונך למחוק את השיר?")) return;
+      const songs = loadSongs();
+      songs.splice(index, 1);
+      saveSongs(songs);
+      renderSongs();
+    }
+
+    function editSong(index) {
+      const songs = loadSongs();
+      const song = songs[index];
+      const newName = prompt("שם חדש לשיר:", song.name);
+      const newSinger = prompt("שם חדש לזמר:", song.singer);
+      if (newName && newSinger) {
+        song.name = newName;
+        song.singer = newSinger;
+        saveSongs(songs);
+        renderSongs();
+      }
+    }
+
+    renderSongs();
+  </script>
+</body>
+</html>
