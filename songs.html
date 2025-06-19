@@ -43,7 +43,7 @@
     const songsList = document.getElementById("songsList");
 
     async function fetchSongs() {
-      const res = await fetch("https://script.google.com/macros/s/AKfycbybHPxmX4vezQ5JN_RGIBbh3WSWgGqbmyC_MVyXAdkch2yfiGDOztSSS64FbH5a7mL1mA/exec");
+      const res = await fetch("https://script.google.com/macros/s/AKfycbz01jfVFWgMukFzh_AidJA9KXw0CXVVfXelg6XPrHducScHZA7XjAmNCEOBtlujSEoZAA/exec");
       const data = await res.json();
       return data.filter(song => song.category === category && song.rhythm === rhythm);
     }
@@ -82,7 +82,7 @@
         singer
       };
 
-      await fetch("https://script.google.com/macros/s/AKfycbybHPxmX4vezQ5JN_RGIBbh3WSWgGqbmyC_MVyXAdkch2yfiGDOztSSS64FbH5a7mL1mA/exec", {
+      await fetch("https://script.google.com/macros/s/AKfycbz01jfVFWgMukFzh_AidJA9KXw0CXVVfXelg6XPrHducScHZA7XjAmNCEOBtlujSEoZAA/exec", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
